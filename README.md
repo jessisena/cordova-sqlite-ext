@@ -1,3 +1,53 @@
+A fork from:
+
+https://github.com/litehelpers/cordova-sqlite-ext
+
+EXTRA FEATURE: 
+
+Pre-populated DB from an specific path (diferent than "www")
+
+### Adapted Pre-populated database(s)
+
+3 options:
+
+1) Put the database file in the `www` directory and open the database as follows (**both** database location and `createFromLocation` items are required):
+
+```js
+var db = window.sqlitePlugin.openDatabase({name: "my.db", location: 'default', createFromLocation: 1});
+```
+
+**IMPORTANT NOTES:**
+
+- Put the pre-populated database file in the `www` subdirectory. (This should work well the Cordova CLI.)  No matter which child folder your HTML file is in, the database MUST sit in the 'www' subdirectory. 
+- The pre-populated database file name must match **exactly** the file name given in `openDatabase`. This plugin does *not* use an automatic extension.
+- The pre-populated database file is ignored if the database file with the same name already exists in your database file location.
+
+**TIP:** If you don't see the data from the pre-populated database file, completely remove your app and try it again!
+
+2) Put the database file somewhere inside the app installation folder.
+
+```js
+var db = window.sqlitePlugin.openDatabase({name: path_to_app_folder/"my.db", createFromLocation: 2});
+```
+
+3) Put the database in a known path in the device storage.
+
+```js
+var db = window.sqlitePlugin.openDatabase({name: path_to_db/"my.db", createFromLocation: 3});
+```
+
+**IMPORTANT NOTES:**
+
+- With this option the database will be opened in READ ONLY mode.
+
+
+
+
+
+
+
+
+
 # Cordova/PhoneGap sqlite storage adapter with extra features
 
 Native interface to sqlite in a Cordova/PhoneGap plugin for Android, iOS, macOS, and Windows 10 (UWP), with API similar to HTML5/[Web SQL API](http://www.w3.org/TR/webdatabase/).
