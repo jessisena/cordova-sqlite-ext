@@ -194,15 +194,27 @@ public class SQLitePlugin extends CordovaPlugin {
      * Open a database.
      *
      * @param dbName   The name of the database file
+     * @param CreateFromResource     true if is a prepoluted DB
+     * @param respurceType     type of prepopulated database (1: from www directory, 2: from path inside app installation folder, 3: any path, but READ ONLY mode). 
+     *                         For 2, 3 cases, de path is inside de dbname param.
      */
-    private SQLiteAndroidDatabase openDatabase(String dbname, boolean createFromResource, CallbackContext cbc, boolean old_impl) throws Exception {
+    private SQLiteAndroidDatabase openDatabase(String dbname, boolean createFromResource, CallbackContext cbc, boolean old_impl, int resourceType) throws Exception {
         try {
             // ASSUMPTION: no db (connection/handle) is already stored in the map
             // [should be true according to the code in DBRunner.run()]
 
             File dbfile = this.cordova.getActivity().getDatabasePath(dbname);
 
-            if (!dbfile.exists() && createFromResource) this.createFromResource(dbname, dbfile);
+            //if (!dbfile.exists() && createFromResource) this.createFromResource(dbname, dbfile);
+
+            if (!dbfile.exists() && createFromResource && resourceType == 1){
+                this.createFromResource(dbname, dbfile);
+
+            }else if (!dbfile.exists() && createFromResource && resourceType > 1){
+                dbfile = new File(dbname);
+
+            }
+
 
             if (!dbfile.exists()) {
                 dbfile.getParentFile().mkdirs();
@@ -211,7 +223,13 @@ public class SQLitePlugin extends CordovaPlugin {
             Log.v("info", "Open sqlite db: " + dbfile.getAbsolutePath());
 
             SQLiteAndroidDatabase mydb = old_impl ? new SQLiteAndroidDatabase() : new SQLiteConnectorDatabase();
-            mydb.open(dbfile);
+            //mydb.open(dbfile);
+            //If resourceType is 3, BD will be opened in READ ONLY mode, otherwise in the normal mode
+            if(resourceType == 3){
+                mydb.openReadOnly(dbfile);
+            }else{
+                mydb.open(dbfile);
+            }            
 
             if (cbc != null) // XXX Android locking/closing BUG workaround
                 cbc.success();
@@ -358,6 +376,13 @@ public class SQLitePlugin extends CordovaPlugin {
     private class DBRunner implements Runnable {
         final String dbname;
         private boolean createFromResource;
+        /*DB resource type
+        1: DB in www of the project
+        2: DB in an specific path, but always inside de installation app folder
+        3: DB in an specific path, but it will be opened in READ ONLY mode
+        */
+        private int resourceType;
+
         private boolean oldImpl;
         private boolean bugWorkaround;
 
@@ -369,6 +394,17 @@ public class SQLitePlugin extends CordovaPlugin {
         DBRunner(final String dbname, JSONObject options, CallbackContext cbc) {
             this.dbname = dbname;
             this.createFromResource = options.has("createFromResource");
+
+            /*Get the value for resourceType, from the param 'CreateFromResource'*/
+            try{
+                //if(LOG) Log.i("ionic 1", " createFromResource: "+options.getString("createFromResource"));
+                if(this.createFromResource) this.resourceType = Integer.parseInt(options.getString("createFromResource"));
+                else this.resourceType = 0;
+            }catch(Exception e){
+                Log.e("SQLitePlugin.java", "Error getString value from param createFromResource");
+            }
+
+
             this.oldImpl = options.has("androidOldDatabaseImplementation");
             //Log.v(SQLitePlugin.class.getSimpleName(), "Android db implementation: built-in android.database.sqlite package");
             Log.v(SQLitePlugin.class.getSimpleName(), "Android db implementation: " + (oldImpl ? "built-in android.database.sqlite package (OLD)" : "Android-sqlite-connector (NDK)"));
@@ -382,7 +418,8 @@ public class SQLitePlugin extends CordovaPlugin {
 
         public void run() {
             try {
-                this.mydb = openDatabase(dbname, this.createFromResource, this.openCbc, this.oldImpl);
+                //this.mydb = openDatabase(dbname, this.createFromResource, this.openCbc, this.oldImpl);
+                this.mydb = openDatabase(dbname, this.createFromResource, this.openCbc, this.oldImpl, this.resourceType);
             } catch (Exception e) {
                 Log.e(SQLitePlugin.class.getSimpleName(), "unexpected error, stopping db thread", e);
                 dbrmap.remove(dbname);

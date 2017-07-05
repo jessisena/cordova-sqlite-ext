@@ -586,6 +586,18 @@
       if (!!openargs.createFromLocation && openargs.createFromLocation === 1) {
         openargs.createFromResource = "1";
       }
+      //Option 2: To open a DB in an specific path, but inside de app installation folder (the path is inside de name parameter)
+      if (!!openargs.createFromLocation && openargs.createFromLocation === 2) {
+        // console.info("--------------------------------createFromResource 2");
+        openargs.createFromResource = "2";
+      }
+      //Option 3: To open a DB in an specific path, but in READ ONLY mode (the path is inside de name parameter) 
+      if (!!openargs.createFromLocation && openargs.createFromLocation === 3) {
+        // console.info("-------------------------createFromResource 3");
+        openargs.createFromResource = "3";
+      }    
+
+
       if (!!openargs.androidDatabaseImplementation && openargs.androidDatabaseImplementation === 2) {
         openargs.androidOldDatabaseImplementation = 1;
       }
