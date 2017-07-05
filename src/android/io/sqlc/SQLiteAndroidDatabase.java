@@ -72,6 +72,16 @@ class SQLiteAndroidDatabase
     }
 
     /**
+     * Open a database READ ONLY mode.
+     *
+     * @param dbfile   The database File specification
+     */
+    void openReadOnly(File dbfile) throws Exception {
+        dbFile = dbfile; // for possible bug workaround
+        mydb = SQLiteDatabase.openDatabase(dbfile.getPath(), null, SQLiteDatabase.OPEN_READONLY);
+    }    
+
+    /**
      * Close a database (in the current thread).
      */
     void closeDatabaseNow() {
