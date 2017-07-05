@@ -1,10 +1,12 @@
-A fork from:
 
+# Personal Cordova/PhoneGap sqlite storage adapter with extra-extra features
+
+Fork from:
 https://github.com/litehelpers/cordova-sqlite-ext
 
-EXTRA FEATURE: 
+Original version from litehelpers includes: REGEXP (Android/iOS/macOS), BASE64, and pre-populated databases
 
-Pre-populated DB from an specific path (diferent than "www")
+and with THIS VERSION, now is posible to use pre-populated DB's from a diferent path than "www".
 
 ### Adapted Pre-populated database(s)
 
